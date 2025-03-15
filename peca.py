@@ -1,18 +1,11 @@
-import pygame
+from Player import Player
 
 class Peca:
-    def __init__(self, pos_x, pos_y, cor) -> None:
-        self.pos_x = pos_x
-        self.pos_y = pos_y
-        self.cor = cor
-
-    def draw(self, screen) -> None:
-        if self.cor == "white":
-            pygame.draw.circle(screen, self.cor, (self.pos_x, self.pos_y), 18, 0)
-            pygame.draw.circle(screen, "black", (self.pos_x, self.pos_y), 18, 1)
-            pygame.draw.circle(screen, "black", (self.pos_x, self.pos_y), 9, 1)
-        else:
-            pygame.draw.circle(screen, self.cor, (self.pos_x, self.pos_y), 18, 0)
-            # teste para desenhar peça preta
-            #pygame.draw.circle(screen, "white", (self.pos_x, self.pos_y), 18, 1) 
-            pygame.draw.circle(screen, "white", (self.pos_x, self.pos_y), 9, 1)
+    def __init__(self, pos_x, pos_y, player:Player) -> None:
+        self.position = (pos_x, pos_y)
+        self.player = player
+    
+    def __lt__(self, otherPiece):
+        line, col = self.position
+        opLine, opCol = otherPiece.position
+        return line <= opLine and col <= opCol
