@@ -9,6 +9,7 @@ class Game:
         self.players = players
         self.current_player = self.players[0]
         self.plays = 0
+        self.scale = 25
 
     def init_game_board(self, size_game_board):
         game_board = []
@@ -21,23 +22,19 @@ class Game:
         return game_board
 
     def play(self, piece:Peca):
-        piece = deepcopy(piece)
-        line,col = piece.position
-        line /= 25
-        col /= 25
-        line = int(line)
-        col = int(col)
-        piece.position = (line, col)
-        print(piece.position)
-        self.game_board[line][col] = piece.player.name
-        piece.player.played_pieces.append(piece)
-        print(self.__repr__())
-        if(self.verify_win(piece.player)):
-            return 'win'
-        #validação de jogada
-        self.plays += 1
-        self.current_player = self.players[self.plays % (len(self.players)-1)] 
-        return 'ok'
+        copy_piece = deepcopy(piece)
+        line, col = copy_piece.position
+        line = int(line/self.scale)
+        col = int(col/self.scale)
+        copy_piece.position = (line, col)
+        if(self.game_board[line][col] == '_'):
+            self.game_board[line][col] = copy_piece.player.name
+            piece.player.played_pieces.append(copy_piece)
+            if(self.verify_win(copy_piece.player)):
+                return 'win'
+            self.plays += 1
+            self.current_player = self.players[self.plays % (len(self.players))]
+            return 'ok'
         return 'nok'
     
     def verify_win(self, player:Player):
@@ -54,6 +51,7 @@ class Game:
                     self.verify_second_diagonal(current_piece)
                 ): 
                     return True
+        return False
 
     def verify_vertical(self, piece:Peca):
         line, col = piece.position
@@ -73,6 +71,7 @@ class Game:
         while(self.game_board[line][col] == piece.player.name and line < self.size and col < self.size):
             line += 1
             col += 1
+        print(line, initial_line, col, initial_col)
         return line - initial_line == 5 and col - initial_col == 5
     
     def verify_second_diagonal(self, piece:Peca):

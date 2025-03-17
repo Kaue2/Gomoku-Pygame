@@ -3,38 +3,52 @@ from Peca import Peca
 from Game import Game
 
 class PyGameConfig:
-    def __init__(self, game:Game):
+    def __init__(self, game:Game, scale:int = 25):
         pygame.init()
         self.name_project = 'Gomoku'
         self.background_color = (194, 147, 107)
-        self.resolution = (600,600)
+        self.scale = scale
+        self.resolution = (self.scale * 15, self.scale * 15)
         self.screen = self.create_screen()
         self.isRunning = True
         self.redraw = False
         self.clock = pygame.time.Clock()
         self.game = game
+        self.game.scale = scale
 
     def draw_table(self) -> tuple[bool, bool]:
-        for i in range(16):
-            pygame.draw.line(self.screen, "black", pygame.math.Vector2(i*44, 0), pygame.math.Vector2(i*44, 748))
-            pygame.draw.line(self.screen, "black", pygame.math.Vector2(0, i*44), pygame.math.Vector2(748, i*44))
-        for i in range(1, 16):
-            pygame.draw.circle(self.screen, "black", pygame.math.Vector2(i*44, 44), 3)
+        for i in range(1, 17):
+            pygame.draw.line(self.screen, "black", pygame.math.Vector2(i*self.scale, self.scale), pygame.math.Vector2(i*self.scale, self.resolution[0]))
+            pygame.draw.line(self.screen, "black", pygame.math.Vector2(self.scale, i*self.scale), pygame.math.Vector2(self.resolution[0], i*self.scale))
+        for i in range(1,16):
+            for j in range(1,16):
+                pygame.draw.circle(self.screen, "black", pygame.math.Vector2(j*self.scale, i*self.scale), 3)
         pygame.display.flip()
         
     def draw_piece(self, peca:Peca):
         color = peca.player.color
-        position = peca.position
-        position = sorted(position, reverse=True)
+        position = (peca.position[1] + self.scale, peca.position[0] + self.scale)
         if color == "white":
-            pygame.draw.circle(self.screen, color, position, 18, 0)
-            pygame.draw.circle(self.screen, "black", position, 18, 1)
-            pygame.draw.circle(self.screen, "black", position, 9, 1)
+            pygame.draw.circle(self.screen, color, position, 9, 0)
+            pygame.draw.circle(self.screen, "black", position, 5, 1)
         else:
-            pygame.draw.circle(self.screen, color, position, 18, 0)
-            # teste para desenhar peça preta
-            #pygame.draw.circle(self.screen, "white", position, 18, 1) 
-            pygame.draw.circle(self.screen, "white", position, 9, 1)
+            pygame.draw.circle(self.screen, color, position, 9, 0)
+            pygame.draw.circle(self.screen, "white", position, 5, 1) 
+
+    def handle_click_button_game(self):
+        pos_x, pos_y = pygame.mouse.get_pos()
+        pos_x -= self.scale
+        pos_y -= self.scale
+        pos_x = round(pos_x / self.scale) * self.scale
+        pos_y = round(pos_y / self.scale) * self.scale
+        p = Peca(pos_y,pos_x, self.game.current_player)
+        play = self.game.play(p)  
+        if(play == 'ok'):
+            self.draw_piece(p)
+        if(play == 'win'):
+            self.isRunning = False
+        
+        self.redraw = True
 
     def handle_input(self, event) -> tuple[bool, bool]:
         self.isRunning = True
@@ -42,25 +56,19 @@ class PyGameConfig:
 
         match(event.type):
             case pygame.QUIT:
-                self.running = False
+                self.isRunning = False
+
             case pygame.KEYDOWN:
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_ESCAPE]:
-                    self.running = False
+                    self.isRunning = False
             
             case pygame.MOUSEBUTTONDOWN:
                 mouseBtns = pygame.mouse.get_pressed(3)
-                if mouseBtns[0]:
-                    pos_x, pos_y = pygame.mouse.get_pos()
-                    pos_x = round(pos_x / 25) * 25
-                    pos_y = round(pos_y / 25) * 25
-                    p = Peca(pos_y,pos_x, self.game.current_player)
-                    if(self.game.play(p) == 'ok'):
-                        self.draw_piece(p)
-                    self.redraw = True
+                if mouseBtns[0]: self.handle_click_button_game()
 
     def create_screen(self):
-        screen = pygame.display.set_mode(self.resolution)
+        screen = pygame.display.set_mode((self.resolution[0] + self.scale, self.resolution[1] + self.scale))
         screen.fill(self.background_color)
         pygame.display.set_caption(self.name_project)
         return screen
