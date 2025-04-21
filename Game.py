@@ -11,6 +11,21 @@ class Game:
         self.scale = 25
         self.points_to_win = points_to_win
 
+    def save_state(self):
+        return {
+            "size":self.size,
+            "game_board": self.game_board,
+            "players": deepcopy(self.players),
+            "current_player": deepcopy(self.current_player),
+            "plays": self.plays
+        }
+    def load_state(self, state):
+        self.size = state["size"]
+        self.game_board = state["game_board"]
+        self.players = state["players"]
+        self.current_player = state["current_player"]
+        self.plays = state["plays"]
+
     def init_game_board(self, size_game_board):
         game_board = []
         line = []
@@ -68,6 +83,7 @@ class Game:
                 self.verify_second_diagonal(current_piece)[0]
             )
         return 0
+   
     def verify_vertical(self, piece):
         line, col = piece.position
         initial_line = line

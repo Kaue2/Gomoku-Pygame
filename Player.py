@@ -33,19 +33,21 @@ class IAPlayer(Player):
         
         if(current_player.min_max):
             for play in game.create_valid_plays():
-                game_copy = deepcopy(game)
-                jogada = game_copy.current_player.create_piece_play(play[0]*game.scale,play[1]*game.scale)
-                game_copy.play(jogada)
-                utility = self.minimax_alfabetaprunnig(game_copy, game_copy.current_player, max_deep-1, alfa, beta)
+                current_state = game.save_state()
+                jogada = game.current_player.create_piece_play(play[0]*game.scale,play[1]*game.scale)
+                game.play(jogada)
+                utility = self.minimax_alfabetaprunnig(game, game.current_player, max_deep-1, alfa, beta)
+                game.load_state(current_state)
                 alfa = max(utility, alfa)
                 if (alfa > beta): break
             return alfa
         else:
             for play in game.create_valid_plays():
-                game_copy = deepcopy(game)
-                jogada = game_copy.current_player.create_piece_play(play[0]*game_copy.scale,play[1]*game_copy.scale)
-                game_copy.play(jogada)
-                utility = self.minimax_alfabetaprunnig(game_copy, game_copy.current_player, max_deep-1, alfa, beta)
+                current_state = game.save_state()
+                jogada = game.current_player.create_piece_play(play[0]*game.scale,play[1]*game.scale)
+                game.play(jogada)
+                utility = self.minimax_alfabetaprunnig(game, game.current_player, max_deep-1, alfa, beta)
+                game.load_state(current_state)
                 beta = min(utility, beta)
                 if (alfa > beta): break
             return beta
