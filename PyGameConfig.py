@@ -1,9 +1,8 @@
 import pygame
-from Peca import Peca
-from Game import Game
+from Player import HumanPlayer
 
 class PyGameConfig:
-    def __init__(self, game:Game, scale:int = 25):
+    def __init__(self, game, scale:int = 25):
         pygame.init()
         self.name_project = 'Gomoku'
         self.background_color = (194, 147, 107)
@@ -17,15 +16,15 @@ class PyGameConfig:
         self.game.scale = scale
 
     def draw_table(self) -> tuple[bool, bool]:
-        for i in range(1, 17):
+        for i in range(1, self.game.size + 1):
             pygame.draw.line(self.screen, "black", pygame.math.Vector2(i*self.scale, self.scale), pygame.math.Vector2(i*self.scale, self.resolution[0]))
             pygame.draw.line(self.screen, "black", pygame.math.Vector2(self.scale, i*self.scale), pygame.math.Vector2(self.resolution[0], i*self.scale))
-        for i in range(1,16):
-            for j in range(1,16):
+        for i in range(1,self.game.size+1):
+            for j in range(1,self.game.size+1):
                 pygame.draw.circle(self.screen, "black", pygame.math.Vector2(j*self.scale, i*self.scale), 3)
         pygame.display.flip()
         
-    def draw_piece(self, peca:Peca):
+    def draw_piece(self, peca):
         color = peca.player.color
         position = (peca.position[1] + self.scale, peca.position[0] + self.scale)
         if color == "white":
@@ -35,20 +34,20 @@ class PyGameConfig:
             pygame.draw.circle(self.screen, color, position, 9, 0)
             pygame.draw.circle(self.screen, "white", position, 5, 1) 
 
+    def handle_play(self, p):
+        self.game.play(p)  
+        self.draw_piece(p)
+        if(self.game.current_player.status != 'playing'):
+            self.isRunning = False
+        self.redraw = True
+
     def handle_click_button_game(self):
         pos_x, pos_y = pygame.mouse.get_pos()
         pos_x -= self.scale
         pos_y -= self.scale
         pos_x = round(pos_x / self.scale) * self.scale
         pos_y = round(pos_y / self.scale) * self.scale
-        p = Peca(pos_y,pos_x, self.game.current_player)
-        play = self.game.play(p)  
-        if(play == 'ok'):
-            self.draw_piece(p)
-        if(play == 'win'):
-            self.isRunning = False
-        
-        self.redraw = True
+        self.handle_play(self.game.current_player.create_piece_play(pos_y, pos_x))
 
     def handle_input(self, event) -> tuple[bool, bool]:
         self.isRunning = True
@@ -76,8 +75,11 @@ class PyGameConfig:
     def start_game(self):
         self.draw_table()
         while self.isRunning:
-            for event in pygame.event.get():
-                self.handle_input(event)  
+            if(type(self.game.current_player) is HumanPlayer):
+                for event in pygame.event.get():
+                    self.handle_input(event)  
+            else:
+                self.handle_play(self.game.current_player.define_an_play(self.game))
             if not self.isRunning:
                 pygame.quit()
                 break

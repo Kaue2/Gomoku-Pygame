@@ -1,7 +1,5 @@
-from Player import Player
-
 class Peca:
-    def __init__(self, pos_x, pos_y, player:Player) -> None:
+    def __init__(self, pos_x, pos_y, player):
         self.position = (pos_x, pos_y)
         self.player = player
     
@@ -9,3 +7,5 @@ class Peca:
         line, col = self.position
         opLine, opCol = otherPiece.position
         return line <= opLine and col <= opCol
+    def __repr__(self):
+        return f"({self.position[0]},{self.position[1]}, player: {self.player})"

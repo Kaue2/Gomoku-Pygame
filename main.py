@@ -1,15 +1,15 @@
-from PyGameConfig import PyGameConfig
 from Game import Game
-from Player import Player
+from PyGameConfig import PyGameConfig
+from Player import HumanPlayer, IAPlayer
 
-size = 15
+size = 5
 scale = 25
-
+points_to_win = 4
 players = [
-    Player('j1','white'),
-    Player('j2', 'red')
+    HumanPlayer('Você','white'),
+    IAPlayer('IA', 'red')
 ]
 
-game = Game(size, players)
+game = Game(size, players, points_to_win)
 pg = PyGameConfig(game, scale)
 pg.start_game()
